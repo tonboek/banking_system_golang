@@ -18,14 +18,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	repo := repository.NewAccountRepository(db)
-	service := services.NewAccountService(repo)
-	handler := handlers.NewAccountHandler(service)
+	userRepo := repository.NewUserRepository(db)
+	userService := services.NewUserService(userRepo)
+	userHandler := handlers.NewUserHandler(userService)
 
-	http.HandleFunc("/accounts", handler.CreateAccount)
-	http.HandleFunc("/accounts/{id}", handler.GetAccountByID)
-	http.HandleFunc("/accounts/deposit", handler.AddMoneyToBalance)
-	http.HandleFunc("/accounts/transaction", handler.Transaction)
+	http.HandleFunc("/register", userHandler.Register)
+
+
+	accRepo := repository.NewAccountRepository(db)
+	accService := services.NewAccountService(accRepo)
+	accHandler := handlers.NewAccountHandler(accService)
+
+	http.HandleFunc("/accounts", accHandler.CreateAccount)
+	http.HandleFunc("/accounts/{id}", accHandler.GetAccountByID)
+	http.HandleFunc("/accounts/deposit", accHandler.AddMoneyToBalance)
+	http.HandleFunc("/accounts/transaction", accHandler.Transaction)
 
 	log.Println("Server started on port 8080!")
 	log.Fatal(http.ListenAndServe(":8080", nil))

@@ -6,8 +6,12 @@ import (
 
 // пользователь
 type User struct {
-	ID    int64 `json:"id" db:"id"`
-	Email string `json:"email" db:"email"`
+	ID    int64 		`json:"id" db:"id"`
+	Name string 		`json:"name" db:"name"`
+	Username string 	`json:"username" db:"username"`
+	Email string 		`json:"email" db:"email"`
+	Password  string    `json:"-"`
+    CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
 // банковский счет пользователя
