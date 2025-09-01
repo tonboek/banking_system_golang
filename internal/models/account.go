@@ -36,4 +36,5 @@ type Transaction struct {
 type TransactionResult struct {
 	FromAcc *Account `json:"from"`
 	ToAcc *Account 	`json:"to"`
+	Transaction *Transaction `json:"transaction"`
 }

@@ -55,13 +55,13 @@ func (s *AccountService) AddMoneyToBalance(ctx context.Context, id int, amount f
 
 func (s *AccountService) Transaction(ctx context.Context, fromID, toID int, amount float64) (*models.TransactionResult, error) {
 	if amount < 0 {
-		return nil, errors.New("сумма должна быть больше 0")
+		return nil, nil, nil, errors.New("сумма должна быть больше 0")
 	}
 
-	fromAcc, toAcc, err := s.repo.Transaction(ctx, fromID, toID, amount)
+	fromAcc, toAcc, tx, err := s.repo.Transaction(ctx, fromID, toID, amount)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
-	return &models.TransactionResult{FromAcc: fromAcc, ToAcc: toAcc}, nil
+	return &models.TransactionResult{FromAcc: fromAcc, ToAcc: toAcc, Transaction: tx}, nil
 }

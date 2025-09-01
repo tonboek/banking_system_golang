@@ -43,10 +43,10 @@ func (r *AccountRepository) AddMoneyToBalance(ctx context.Context, id int, amoun
 	return newBal, err
 }
 
-func (r *AccountRepository) Transaction(ctx context.Context, fromID, toID int, amount float64) (*models.Account, *models.Account, error) {
+func (r *AccountRepository) Transaction(ctx context.Context, fromID, toID int, amount float64) (*models.Account, *models.Account, *models.Transaction, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	defer tx.Rollback()
 
@@ -61,7 +61,7 @@ func (r *AccountRepository) Transaction(ctx context.Context, fromID, toID int, a
 	}
 
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	var toAcc models.Account
@@ -71,12 +71,23 @@ func (r *AccountRepository) Transaction(ctx context.Context, fromID, toID int, a
 		 RETURNING id, owner, balance, created_at`
 	err = tx.QueryRowContext(ctx, queryToID, amount, toID).Scan(&toAcc.ID, &toAcc.Owner, &toAcc.Balance, &toAcc.CreatedAt)
 	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	var t models.Transaction
+	queryTx := `
+		INSERT INTO transactions (from_id, to_id, amount, created_at)
+		VALUES ($1, $2, $3, NOW())
+		RETURNING id, from_id, to_id, amount, created_at
+	`
+	err = tx.QueryRowContext(ctx, queryTx, fromID, toID, amount).Scan(&t.ID, &t.FromID, &t.ToID, &t.Amount, &t.CreatedAt)
+	if err != nil {
 		return nil, nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return &fromAcc, &toAcc, nil
+	return &fromAcc, &toAcc, &t, nil
 }
