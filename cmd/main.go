@@ -23,6 +23,7 @@ func main() {
 	userHandler := handlers.NewUserHandler(userService)
 
 	http.HandleFunc("/register", userHandler.Register)
+	http.HandleFunc("/login", userHandler.Login)
 
 
 	accRepo := repository.NewAccountRepository(db)

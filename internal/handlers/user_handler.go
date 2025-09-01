@@ -16,13 +16,8 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 }
 
 func(h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	type RegisterRequest struct {
-		Name 	string 	`json:"name"`
-		Username string `json:"username"`
-		Email 	string 	`json:"email"`
-		Password string `json:"password"`
-	}
-	var req RegisterRequest
+	var req models.RegisterRequest
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -39,5 +34,20 @@ func(h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user.Password = ""
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(&models.AuthResponse{Token: token, User: *user})
+}
+
+func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var req models.LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	user, err := h.service.Login(r.Context(), req.Username, req.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	json.NewEncoder(w).Encode(&models.AuthResponse{Token: token, User: *user})
 }

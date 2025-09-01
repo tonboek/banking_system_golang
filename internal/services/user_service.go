@@ -24,3 +24,21 @@ func (s *UserService) Register(ctx context.Context, name, username, email, passw
 
     return s.repo.Create(ctx, name, username, email, string(hashed))
 }
+
+func (s *UserService) Login(ctx context.Context, username, password string) (*models.User, error) {
+    user, err := s.repo.FindByUsername(ctx, username)
+    if err != nil {
+        return nil, errors.New("пользователь не найден")
+    }
+
+    if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+        return nil, errors.New("неверный пароль")
+    }
+
+    token, err := utils.GenerateToken(username)
+    if err != nil {
+        return nil, errors.New("ошибка при генерации токена")
+    }
+
+    return token, nil
+}
