@@ -42,3 +42,19 @@ func (s *UserService) Login(ctx context.Context, username, password string) (*mo
 
     return token, nil
 }
+
+func (s *UserService) UpdateUser(ctx context.Context, user *models.User) error {
+    if user.Password != "" {
+        hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+        if err != nil {
+            return err
+        }
+        user.Password = string(hash)
+    }
+
+    return s.repo.Update(ctx, user)
+}
+
+func (s *UserService) DeleteUser(ctx context.Context, id int64) error {
+    return s.repo.Delete(ctx, id)
+}

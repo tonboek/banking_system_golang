@@ -24,6 +24,8 @@ func main() {
 
 	http.HandleFunc("/register", userHandler.Register)
 	http.HandleFunc("/login", userHandler.Login)
+	http.HandleFunc("/users/update", userHandler.Update)
+	http.HandleFunc("/users/delete", userHandler.Delete)
 
 
 	accRepo := repository.NewAccountRepository(db)
